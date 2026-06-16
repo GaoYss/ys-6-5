@@ -3,8 +3,8 @@ import { StatusBadge } from '../components/StatusBadge.jsx'
 
 export function Dashboard({ summary, ingredients, purchaseOrders, profitReport, loading, supplyStats, filterLowStock, filterPending }) {
   const topMargins = [...profitReport].sort((a, b) => b.gross_margin - a.gross_margin).slice(0, 4)
-  const lowStock = supplyStats.filteredIngredients.filter((item) => item.stock_qty <= item.safety_stock)
-  const pendingOrders = supplyStats.filteredPurchaseOrders.filter((order) => order.status === 'ordered' || order.status === 'draft')
+  const lowStock = ingredients.filter((item) => item.stock_qty <= item.safety_stock)
+  const pendingOrders = purchaseOrders.filter((order) => order.status === 'ordered' || order.status === 'draft')
 
   if (loading && !summary) {
     return <div className="panel">数据加载中...</div>
