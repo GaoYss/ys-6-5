@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { CheckCircle2, PackagePlus } from 'lucide-react'
+import { CheckCircle2, PackagePlus, Filter } from 'lucide-react'
 import { api } from '../api/client.js'
 import { StatusBadge } from '../components/StatusBadge.jsx'
 
@@ -13,9 +13,26 @@ export function Supply({ ingredients, suppliers, purchaseOrders, refresh }) {
     remark: '',
   })
 
+  const [filterLowStock, setFilterLowStock] = useState(false)
+  const [filterPending, setFilterPending] = useState(false)
+
   const selectedIngredient = useMemo(
     () => ingredients.find((item) => item.id === form.ingredient_id),
     [ingredients, form.ingredient_id],
+  )
+
+  const filteredIngredients = useMemo(
+    () => filterLowStock
+      ? ingredients.filter((item) => item.stock_qty <= item.safety_stock)
+      : ingredients,
+    [ingredients, filterLowStock],
+  )
+
+  const filteredPurchaseOrders = useMemo(
+    () => filterPending
+      ? purchaseOrders.filter((order) => order.status === 'ordered' || order.status === 'draft')
+      : purchaseOrders,
+    [purchaseOrders, filterPending],
   )
 
   const updateField = (field, value) => setForm((current) => ({ ...current, [field]: value }))
@@ -46,7 +63,17 @@ export function Supply({ ingredients, suppliers, purchaseOrders, refresh }) {
       <section className="panel">
         <div className="section-title">
           <h2>原料库存</h2>
-          <span>{ingredients.length} 项</span>
+          <div className="section-actions">
+            <span>{filteredIngredients.length} 项</span>
+            <button
+              type="button"
+              className={`filter-toggle ${filterLowStock ? 'active' : ''}`}
+              onClick={() => setFilterLowStock((value) => !value)}
+            >
+              <Filter size={14} />
+              只看低库存
+            </button>
+          </div>
         </div>
         <div className="table-wrap">
           <table>
@@ -60,7 +87,7 @@ export function Supply({ ingredients, suppliers, purchaseOrders, refresh }) {
               </tr>
             </thead>
             <tbody>
-              {ingredients.map((item) => (
+              {filteredIngredients.map((item) => (
                 <tr key={item.id} className={item.stock_qty <= item.safety_stock ? 'warning-row' : ''}>
                   <td><strong>{item.name}</strong></td>
                   <td>{item.category}</td>
@@ -78,10 +105,20 @@ export function Supply({ ingredients, suppliers, purchaseOrders, refresh }) {
         <section className="panel">
           <div className="section-title">
             <h2>采购单</h2>
-            <span>{purchaseOrders.length} 单</span>
+            <div className="section-actions">
+              <span>{filteredPurchaseOrders.length} 单</span>
+              <button
+                type="button"
+                className={`filter-toggle ${filterPending ? 'active' : ''}`}
+                onClick={() => setFilterPending((value) => !value)}
+              >
+                <Filter size={14} />
+                只看待入库
+              </button>
+            </div>
           </div>
           <div className="list">
-            {purchaseOrders.map((order) => (
+            {filteredPurchaseOrders.map((order) => (
               <div className="order-row" key={order.id}>
                 <div>
                   <strong>{order.id}</strong>

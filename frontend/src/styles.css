@@ -207,6 +207,31 @@ td small,
   font-size: 13px;
 }
 
+.section-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.filter-toggle {
+  padding: 5px 10px;
+  min-height: 28px;
+  font-size: 12px;
+  border-color: #cad1c7;
+  color: #526159;
+  background: #ffffff;
+}
+
+.filter-toggle.active {
+  background: #2d6a4f;
+  border-color: #2d6a4f;
+  color: #ffffff;
+}
+
+.filter-toggle:hover {
+  border-color: #2d6a4f;
+}
+
 .two-column {
   display: grid;
   grid-template-columns: minmax(0, 1fr) 340px;
