@@ -207,12 +207,6 @@ td small,
   font-size: 13px;
 }
 
-.section-actions {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
 .filter-toggle {
   padding: 5px 10px;
   min-height: 28px;
@@ -230,6 +224,53 @@ td small,
 
 .filter-toggle:hover {
   border-color: #2d6a4f;
+}
+
+.filter-summary {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 14px 16px;
+  border-radius: 8px;
+  margin-bottom: 16px;
+  border: 1px solid;
+}
+
+.filter-summary.has-results {
+  background: #fff7ed;
+  border-color: #f5d5a8;
+  color: #8a5a0f;
+}
+
+.filter-summary.has-results svg {
+  color: #d97706;
+}
+
+.filter-summary.no-results {
+  background: #eef6ee;
+  border-color: #cfe3cf;
+  color: #2d6a4f;
+}
+
+.filter-summary.no-results svg {
+  color: #2d6a4f;
+}
+
+.filter-summary-text {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.filter-summary-text strong {
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.filter-summary-text span {
+  font-size: 15px;
+  font-weight: 600;
+  color: inherit;
 }
 
 .two-column {

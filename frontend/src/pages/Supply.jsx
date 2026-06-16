@@ -1,7 +1,8 @@
 import { useMemo, useState } from 'react'
-import { CheckCircle2, PackagePlus, Filter } from 'lucide-react'
+import { AlertTriangle, CheckCircle2, PackagePlus, Filter, Truck, Boxes } from 'lucide-react'
 import { api } from '../api/client.js'
 import { StatusBadge } from '../components/StatusBadge.jsx'
+import { EmptyState } from '../components/EmptyState.jsx'
 
 export function Supply({ ingredients, suppliers, purchaseOrders, refresh }) {
   const [form, setForm] = useState({
@@ -63,81 +64,101 @@ export function Supply({ ingredients, suppliers, purchaseOrders, refresh }) {
       <section className="panel">
         <div className="section-title">
           <h2>原料库存</h2>
-          <div className="section-actions">
-            <span>{filteredIngredients.length} 项</span>
-            <button
-              type="button"
-              className={`filter-toggle ${filterLowStock ? 'active' : ''}`}
-              onClick={() => setFilterLowStock((value) => !value)}
-            >
-              <Filter size={14} />
-              只看低库存
-            </button>
+          <button
+            type="button"
+            className={`filter-toggle ${filterLowStock ? 'active' : ''}`}
+            onClick={() => setFilterLowStock((value) => !value)}
+          >
+            <Filter size={14} />
+            {filterLowStock ? '取消低库存筛选' : '只看低库存'}
+          </button>
+        </div>
+        {filterLowStock && (
+          <div className={`filter-summary ${filteredIngredients.length > 0 ? 'has-results' : 'no-results'}`}>
+            <AlertTriangle size={18} />
+            <div className="filter-summary-text">
+              <strong>低库存筛选已启用</strong>
+              <span>共 {filteredIngredients.length} 项原料低于安全库存</span>
+            </div>
           </div>
-        </div>
-        <div className="table-wrap">
-          <table>
-            <thead>
-              <tr>
-                <th>原料</th>
-                <th>分类</th>
-                <th>库存</th>
-                <th>安全库存</th>
-                <th>均价</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredIngredients.map((item) => (
-                <tr key={item.id} className={item.stock_qty <= item.safety_stock ? 'warning-row' : ''}>
-                  <td><strong>{item.name}</strong></td>
-                  <td>{item.category}</td>
-                  <td>{item.stock_qty}{item.unit}</td>
-                  <td>{item.safety_stock}{item.unit}</td>
-                  <td>¥{item.avg_price}</td>
+        )}
+        {filteredIngredients.length > 0 ? (
+          <div className="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>原料</th>
+                  <th>分类</th>
+                  <th>库存</th>
+                  <th>安全库存</th>
+                  <th>均价</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody>
+                {filteredIngredients.map((item) => (
+                  <tr key={item.id} className={item.stock_qty <= item.safety_stock ? 'warning-row' : ''}>
+                    <td><strong>{item.name}</strong></td>
+                    <td>{item.category}</td>
+                    <td>{item.stock_qty}{item.unit}</td>
+                    <td>{item.safety_stock}{item.unit}</td>
+                    <td>¥{item.avg_price}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        ) : (
+          <EmptyState text={filterLowStock ? '暂无低库存原料，库存状态良好' : '暂无原料数据'} />
+        )}
       </section>
 
       <div className="two-column compact">
         <section className="panel">
           <div className="section-title">
             <h2>采购单</h2>
-            <div className="section-actions">
-              <span>{filteredPurchaseOrders.length} 单</span>
-              <button
-                type="button"
-                className={`filter-toggle ${filterPending ? 'active' : ''}`}
-                onClick={() => setFilterPending((value) => !value)}
-              >
-                <Filter size={14} />
-                只看待入库
-              </button>
-            </div>
+            <button
+              type="button"
+              className={`filter-toggle ${filterPending ? 'active' : ''}`}
+              onClick={() => setFilterPending((value) => !value)}
+            >
+              <Filter size={14} />
+              {filterPending ? '取消待入库筛选' : '只看待入库'}
+            </button>
           </div>
-          <div className="list">
-            {filteredPurchaseOrders.map((order) => (
-              <div className="order-row" key={order.id}>
-                <div>
-                  <strong>{order.id}</strong>
-                  <span>{suppliers.find((item) => item.id === order.supplier_id)?.name} · 到货 {order.expected_arrival}</span>
-                  <small>{order.remark || '无备注'}</small>
-                </div>
-                <div className="order-side">
-                  <b>¥{order.total_amount}</b>
-                  <StatusBadge value={order.status} />
-                  {order.status !== 'received' && (
-                    <button type="button" onClick={() => receive(order)}>
-                      <CheckCircle2 size={15} />
-                      入库
-                    </button>
-                  )}
-                </div>
+          {filterPending && (
+            <div className={`filter-summary ${filteredPurchaseOrders.length > 0 ? 'has-results' : 'no-results'}`}>
+              <Truck size={18} />
+              <div className="filter-summary-text">
+                <strong>待入库筛选已启用</strong>
+                <span>共 {filteredPurchaseOrders.length} 单采购等待入库</span>
               </div>
-            ))}
-          </div>
+            </div>
+          )}
+          {filteredPurchaseOrders.length > 0 ? (
+            <div className="list">
+              {filteredPurchaseOrders.map((order) => (
+                <div className="order-row" key={order.id}>
+                  <div>
+                    <strong>{order.id}</strong>
+                    <span>{suppliers.find((item) => item.id === order.supplier_id)?.name} · 到货 {order.expected_arrival}</span>
+                    <small>{order.remark || '无备注'}</small>
+                  </div>
+                  <div className="order-side">
+                    <b>¥{order.total_amount}</b>
+                    <StatusBadge value={order.status} />
+                    {order.status !== 'received' && (
+                      <button type="button" onClick={() => receive(order)}>
+                        <CheckCircle2 size={15} />
+                        入库
+                      </button>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <EmptyState text={filterPending ? '暂无待入库采购单' : '暂无采购单数据'} />
+          )}
         </section>
 
         <section className="panel side-panel">
