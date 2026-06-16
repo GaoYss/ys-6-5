@@ -1,7 +1,7 @@
 import { MetricCard } from '../components/MetricCard.jsx'
 import { StatusBadge } from '../components/StatusBadge.jsx'
 
-export function Dashboard({ summary, ingredients, purchaseOrders, profitReport, loading, supplyStats }) {
+export function Dashboard({ summary, ingredients, purchaseOrders, profitReport, loading, supplyStats, filterLowStock, filterPending }) {
   const topMargins = [...profitReport].sort((a, b) => b.gross_margin - a.gross_margin).slice(0, 4)
   const lowStock = supplyStats.filteredIngredients.filter((item) => item.stock_qty <= item.safety_stock)
   const pendingOrders = supplyStats.filteredPurchaseOrders.filter((order) => order.status === 'ordered' || order.status === 'draft')
@@ -14,8 +14,20 @@ export function Dashboard({ summary, ingredients, purchaseOrders, profitReport, 
     <div className="page-grid">
       <section className="metrics">
         <MetricCard label="在售菜品" value={summary?.active_dishes ?? 0} helper="当前可售 SKU 基础数" />
-        <MetricCard label="低库存原料" value={supplyStats.lowStockCount} helper="低于或等于安全库存" />
-        <MetricCard label="待处理采购" value={supplyStats.pendingCount} helper="草稿与已下单状态" />
+        <MetricCard
+          label="低库存原料"
+          value={supplyStats.lowStockCount}
+          helper={filterLowStock ? `已筛选 · 共 ${supplyStats.totalIngredients} 项` : '低于或等于安全库存'}
+          badge={filterLowStock ? '低库存筛选中' : null}
+          badgeVariant="warning"
+        />
+        <MetricCard
+          label="待处理采购"
+          value={supplyStats.pendingCount}
+          helper={filterPending ? `已筛选 · 共 ${supplyStats.totalPurchaseOrders} 单` : '草稿与已下单状态'}
+          badge={filterPending ? '待入库筛选中' : null}
+          badgeVariant="info"
+        />
         <MetricCard
           label="平均毛利率"
           value={`${Math.round((summary?.average_margin ?? 0) * 100)}%`}

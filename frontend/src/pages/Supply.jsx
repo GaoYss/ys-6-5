@@ -51,22 +51,30 @@ export function Supply({ ingredients, suppliers, purchaseOrders, refresh, filter
         <MetricCard
           label="原料总数"
           value={filterLowStock ? lowStockCount : totalIngredients}
-          helper={filterLowStock ? `已筛选低库存 · 共 ${totalIngredients} 项` : '全部原料品类数量'}
+          helper={filterLowStock ? `已筛选 · 共 ${totalIngredients} 项` : '全部原料品类数量'}
+          badge={filterLowStock ? '低库存筛选中' : null}
+          badgeVariant="warning"
         />
         <MetricCard
           label="低库存原料"
           value={lowStockCount}
           helper={lowStockCount > 0 ? '需要及时补货' : '库存状态良好'}
+          badge={filterLowStock ? '低库存筛选中' : null}
+          badgeVariant="warning"
         />
         <MetricCard
           label="采购单总数"
           value={filterPending ? pendingCount : totalPurchaseOrders}
-          helper={filterPending ? `已筛选待入库 · 共 ${totalPurchaseOrders} 单` : '全部采购单数量'}
+          helper={filterPending ? `已筛选 · 共 ${totalPurchaseOrders} 单` : '全部采购单数量'}
+          badge={filterPending ? '待入库筛选中' : null}
+          badgeVariant="info"
         />
         <MetricCard
           label="待入库采购"
           value={pendingCount}
           helper={pendingCount > 0 ? '等待确认入库' : '暂无待处理采购'}
+          badge={filterPending ? '待入库筛选中' : null}
+          badgeVariant="info"
         />
       </section>
 
