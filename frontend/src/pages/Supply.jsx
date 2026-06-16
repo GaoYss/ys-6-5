@@ -3,8 +3,9 @@ import { AlertTriangle, CheckCircle2, PackagePlus, Filter, Truck, Boxes } from '
 import { api } from '../api/client.js'
 import { StatusBadge } from '../components/StatusBadge.jsx'
 import { EmptyState } from '../components/EmptyState.jsx'
+import { MetricCard } from '../components/MetricCard.jsx'
 
-export function Supply({ ingredients, suppliers, purchaseOrders, refresh }) {
+export function Supply({ ingredients, suppliers, purchaseOrders, refresh, filterLowStock, setFilterLowStock, filterPending, setFilterPending, supplyStats }) {
   const [form, setForm] = useState({
     supplier_id: '',
     ingredient_id: '',
@@ -14,27 +15,12 @@ export function Supply({ ingredients, suppliers, purchaseOrders, refresh }) {
     remark: '',
   })
 
-  const [filterLowStock, setFilterLowStock] = useState(false)
-  const [filterPending, setFilterPending] = useState(false)
-
   const selectedIngredient = useMemo(
     () => ingredients.find((item) => item.id === form.ingredient_id),
     [ingredients, form.ingredient_id],
   )
 
-  const filteredIngredients = useMemo(
-    () => filterLowStock
-      ? ingredients.filter((item) => item.stock_qty <= item.safety_stock)
-      : ingredients,
-    [ingredients, filterLowStock],
-  )
-
-  const filteredPurchaseOrders = useMemo(
-    () => filterPending
-      ? purchaseOrders.filter((order) => order.status === 'ordered' || order.status === 'draft')
-      : purchaseOrders,
-    [purchaseOrders, filterPending],
-  )
+  const { filteredIngredients, filteredPurchaseOrders, totalIngredients, lowStockCount, totalPurchaseOrders, pendingCount } = supplyStats
 
   const updateField = (field, value) => setForm((current) => ({ ...current, [field]: value }))
 
@@ -61,6 +47,29 @@ export function Supply({ ingredients, suppliers, purchaseOrders, refresh }) {
 
   return (
     <div className="page-grid">
+      <section className="metrics supply-metrics">
+        <MetricCard
+          label="原料总数"
+          value={filterLowStock ? lowStockCount : totalIngredients}
+          helper={filterLowStock ? `已筛选低库存 · 共 ${totalIngredients} 项` : '全部原料品类数量'}
+        />
+        <MetricCard
+          label="低库存原料"
+          value={lowStockCount}
+          helper={lowStockCount > 0 ? '需要及时补货' : '库存状态良好'}
+        />
+        <MetricCard
+          label="采购单总数"
+          value={filterPending ? pendingCount : totalPurchaseOrders}
+          helper={filterPending ? `已筛选待入库 · 共 ${totalPurchaseOrders} 单` : '全部采购单数量'}
+        />
+        <MetricCard
+          label="待入库采购"
+          value={pendingCount}
+          helper={pendingCount > 0 ? '等待确认入库' : '暂无待处理采购'}
+        />
+      </section>
+
       <section className="panel">
         <div className="section-title">
           <h2>原料库存</h2>
@@ -213,4 +222,3 @@ export function Supply({ ingredients, suppliers, purchaseOrders, refresh }) {
     </div>
   )
 }
-

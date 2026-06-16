@@ -29,6 +29,21 @@ export default function App() {
     purchaseOrders: [],
     profitReport: [],
   })
+  const [filterLowStock, setFilterLowStock] = useState(false)
+  const [filterPending, setFilterPending] = useState(false)
+
+  const supplyStats = useMemo(() => {
+    const lowStockItems = state.ingredients.filter((item) => item.stock_qty <= item.safety_stock)
+    const pendingOrders = state.purchaseOrders.filter((order) => order.status === 'ordered' || order.status === 'draft')
+    return {
+      totalIngredients: state.ingredients.length,
+      lowStockCount: lowStockItems.length,
+      totalPurchaseOrders: state.purchaseOrders.length,
+      pendingCount: pendingOrders.length,
+      filteredIngredients: filterLowStock ? lowStockItems : state.ingredients,
+      filteredPurchaseOrders: filterPending ? pendingOrders : state.purchaseOrders,
+    }
+  }, [state.ingredients, state.purchaseOrders, filterLowStock, filterPending])
 
   const refresh = async () => {
     setState((current) => ({ ...current, loading: true, error: '' }))
@@ -75,7 +90,15 @@ export default function App() {
     [activeModule],
   )
 
-  const commonProps = { ...state, refresh }
+  const commonProps = {
+    ...state,
+    refresh,
+    filterLowStock,
+    setFilterLowStock,
+    filterPending,
+    setFilterPending,
+    supplyStats,
+  }
 
   return (
     <AppShell
